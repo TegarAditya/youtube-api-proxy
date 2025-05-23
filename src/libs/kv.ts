@@ -5,7 +5,7 @@ interface KeyValue {
     value: string
 }
 
-const kv = new Database(".kv/kv_store.db", { strict: true })
+const kv = new Database("kv_store.sqlite", { strict: true, create: true })
 
 export function initKVStore() {
     kv.exec(`
