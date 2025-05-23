@@ -26,3 +26,8 @@ bun run dev
 open http://localhost:3000 or whatever port you specified in the environment variables
 
 ## Using Docker Compose
+
+Setup the docker
+```sh
+docker compose up -d
+```
