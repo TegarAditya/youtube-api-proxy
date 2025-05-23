@@ -1,0 +1,18 @@
+services:
+  app:
+    build:
+        context: .
+        dockerfile: Dockerfile
+    ports: [ "${PORT}:3000" ]
+    env_file: .env
+    environment:
+      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
+      - PORT=3000
+      - NODE_ENV=production
+    volumes: [ "./.kv:/home/bun/app/.kv" ]
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: "1024M"
+    restart: unless-stopped
