@@ -9,7 +9,7 @@ COPY . .
 
 RUN bun install --frozen-lockfile
 
-RUN bun build --compile --minify --bytecode ./src/index.ts --outfile ./dist/compiled/main
+RUN bun build --compile --minify ./src/index.ts --outfile ./dist/compiled/main
 
 # Stage 2
 FROM busybox:uclibc AS wget
