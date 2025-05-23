@@ -5,5 +5,9 @@ node_modules/
 .env
 .kv
 
+# sqlite
+*.sqlite
+*.db
+
 # build
 dist/
