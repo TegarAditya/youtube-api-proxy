@@ -4,7 +4,7 @@ const healthcheck = new Hono()
 
 healthcheck.get("/", async (c) => {
   try {
-      return c.json({ message: "OK" }, 200)
+    return c.json({ message: "OK" }, 200)
   } catch (error) {
     console.error(error)
     return c.json({ message: error }, 500)
