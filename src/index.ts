@@ -5,6 +5,9 @@ import { secureHeaders } from "hono/secure-headers"
 import { trimTrailingSlash } from "hono/trailing-slash"
 import api from "./routes/api"
 import healthcheck from "./routes/healthcheck"
+import { initKVStore } from "./libs/kv"
+
+initKVStore()
 
 const app = new Hono()
 
