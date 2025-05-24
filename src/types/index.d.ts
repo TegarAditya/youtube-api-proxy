@@ -26,41 +26,17 @@ declare global {
   }
 
   interface Thumbnails {
-    default: Default
-    medium: Medium
-    high: High
-    standard: Standard
-    maxres: Maxres
+    default: Thumbnail;
+    medium: Thumbnail;
+    high: Thumbnail;
+    standard?: Thumbnail;
+    maxres?: Thumbnail;
   }
 
-  interface Default {
-    url: string
-    width: number
-    height: number
-  }
-
-  interface Medium {
-    url: string
-    width: number
-    height: number
-  }
-
-  interface High {
-    url: string
-    width: number
-    height: number
-  }
-
-  interface Standard {
-    url: string
-    width: number
-    height: number
-  }
-
-  interface Maxres {
-    url: string
-    width: number
-    height: number
+  interface Thumbnail {
+    url: string;
+    width: number;
+    height: number;
   }
 
   interface Localized {
