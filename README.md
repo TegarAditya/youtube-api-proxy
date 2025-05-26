@@ -7,7 +7,7 @@ This project is intended to save quota by storing search results based on ID int
 ## Usage
 This API has only one endpoint.
 ```
-GET /api/yt/[id]
+GET /api/video/[id]
 ```
 where [id] is the YouTube Content ID
 

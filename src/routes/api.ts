@@ -3,6 +3,6 @@ import { findContent } from "../handlers"
 
 const api = new Hono()
 
-api.get("/yt/:id", ...findContent)
+api.get("/video/:id", ...findContent)
 
 export default api
