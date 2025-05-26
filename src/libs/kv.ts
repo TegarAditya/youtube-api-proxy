@@ -15,7 +15,7 @@ export function initKVStore() {
   }
 }
 
-export function setKeyValue(key: string, value: string) {
+export function setKeyValue(key: string, value: string): void {
   try {
     const stmt = kv.prepare(`
         INSERT INTO kv_store (key, value) VALUES (@key, @value)
@@ -38,7 +38,7 @@ export function getKeyValue(key: string): string | null {
   }
 }
 
-export function deleteKeyValue(key: string) {
+export function deleteKeyValue(key: string): void {
   try {
     kv.transaction(() => {
       const stmt = kv.prepare("DELETE FROM kv_store WHERE key = @key")
@@ -49,5 +49,25 @@ export function deleteKeyValue(key: string) {
     })()
   } catch (error) {
     console.error(`Error deleting key "${key}":`, (error as Error).message)
+  }
+}
+
+export function clearKVStore(): void {
+  try {
+    kv.exec("DELETE FROM kv_store")
+    console.log("KV store cleared")
+  } catch (error) {
+    console.error("Error clearing kv_store:", (error as Error).message)
+  }
+}
+
+export const checkKVHealth = (): boolean => {
+  try {
+    const stmt = kv.prepare("SELECT 1")
+    stmt.get()
+    return true
+  } catch (error) {
+    console.error("KV store health check failed:", (error as Error).message)
+    return false
   }
 }
