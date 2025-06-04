@@ -1,8 +1,9 @@
 import { Hono } from "hono"
-import { findContent } from "../handlers"
+import { clearContents, findContent } from "../handlers"
 
 const api = new Hono()
 
 api.get("/video/:id", ...findContent)
+api.get("/clear", ...clearContents)
 
 export default api
