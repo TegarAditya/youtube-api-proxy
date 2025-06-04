@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory"
 import { zValidator } from "@hono/zod-validator"
 import { z } from "zod"
 import { Context } from "hono"
-import { getKeyValue, setKeyValue } from "../libs/kv"
+import { clearKVStore, getKeyValue, setKeyValue } from "../libs/kv"
 import { getYouTubeContentData } from "../libs/yt"
 
 const factory = createFactory()
@@ -12,7 +12,7 @@ export const findContent = factory.createHandlers(
     "param",
     z.object({
       id: z.string(),
-    }),
+    })
   ),
   async (c: Context) => {
     const id = c.req.param("id")
@@ -38,5 +38,28 @@ export const findContent = factory.createHandlers(
     }
 
     return c.json(newData)
-  },
+  }
 )
+
+export const clearContents = factory.createHandlers(async (c: Context) => {
+  try {
+    const secretKey = process.env.SECRET_KEY
+
+    if (!secretKey) {
+      return c.text("SECRET_KEY is not set", 500)
+    }
+
+    const providedKey = c.req.query("key")
+
+    if (providedKey !== secretKey) {
+      return c.text("Unauthorized", 401)
+    }
+
+    clearKVStore()
+
+    return c.text("Cache cleared successfully")
+  } catch (error) {
+    console.error(`Error clearing cache:`, (error as Error).message)
+    return c.text("Internal Server Error", 500)
+  }
+})
