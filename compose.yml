@@ -10,7 +10,7 @@ services:
       - SECRET_KEY=${SECRET_KEY}
       - PORT=3000
       - NODE_ENV=production
-    volumes: [ "./kv_store.sqlite:/home/bun/app/kv_store.sqlite" ]
+    volumes: [ "./kv_store.sqlite:/app/kv_store.sqlite" ]
     deploy:
       resources:
         limits:
