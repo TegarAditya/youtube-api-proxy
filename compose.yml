@@ -21,7 +21,7 @@ services:
   sql-studio:
     image: "frectonz/sql-studio"
     ports:
-      - "3030:3030"
+      - "127.0.0.1:3030:3030"
     volumes:
       - "./kv_store.sqlite:/data/kv_store.sqlite"
     command: ["/bin/sql-studio", "--no-browser", "--no-shutdown", "--address=0.0.0.0:3030", "sqlite", "/data/kv_store.sqlite"]
