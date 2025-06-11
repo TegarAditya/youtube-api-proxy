@@ -10,9 +10,18 @@ const kv = new Database("kv_store.sqlite", { strict: true, create: true })
 
 export function initKVStore(): void {
   try {
-    kv.exec(`CREATE TABLE IF NOT EXISTS kv_store (key TEXT PRIMARY KEY, value TEXT)`)
-    kv.exec(`ALTER TABLE kv_store ADD COLUMN cached_at DATETIME`)
-    kv.exec(`UPDATE kv_store SET cached_at = CURRENT_TIMESTAMP WHERE cached_at IS NULL`)
+    kv.exec(`CREATE TABLE IF NOT EXISTS kv_store (key TEXT PRIMARY KEY, value TEXT, cached_at DATETIME)`)
+
+    const cacheDateColumnExists = (kv.prepare(
+      `SELECT COUNT(*) AS count FROM pragma_table_info('kv_store') WHERE name = 'cached_at'`
+    ).get() as { count: number }).count > 0;
+
+    if (!cacheDateColumnExists) {
+      kv.exec(`ALTER TABLE kv_store ADD COLUMN cached_at DATETIME`);
+      kv.exec(`UPDATE kv_store SET cached_at = CURRENT_TIMESTAMP WHERE cached_at IS NULL`);
+    }
+
+    console.log("KV store initialized successfully")
   } catch (error) {
     if (!(error instanceof Error && error.message.includes("duplicate column"))) {
       console.error("Error initializing kv_store:", (error as Error).message)
