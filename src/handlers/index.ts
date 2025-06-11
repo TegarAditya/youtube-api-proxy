@@ -26,6 +26,7 @@ export const findContent = factory.createHandlers(
 
     const content = getKeyValue(id)
     if (content && validateCacheExpiration(content.cached_at)) {
+      console.log(`Cache hit for ID: ${id}; returning cached data.`)
       return c.json(JSON.parse(content.value))
     }
 
@@ -39,6 +40,7 @@ export const findContent = factory.createHandlers(
     if (!newData) return c.text("No data found", 404)
 
     try {
+      console.log(`Cache miss for ID: ${id}; setting new data.`)
       setKeyValue(id, JSON.stringify(newData))
     } catch (error) {
       console.error(`Error setting key "${id}":`, (error as Error).message)
