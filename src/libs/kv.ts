@@ -3,23 +3,37 @@ import Database from "bun:sqlite"
 interface KeyValue {
   key: string
   value: string
+  cached_at: string
 }
 
 const kv = new Database("kv_store.sqlite", { strict: true, create: true })
 
-export function initKVStore() {
+export function initKVStore(): void {
   try {
-    kv.exec(`CREATE TABLE IF NOT EXISTS kv_store (key TEXT PRIMARY KEY, value TEXT)`)
+    kv.exec(`CREATE TABLE IF NOT EXISTS kv_store (key TEXT PRIMARY KEY, value TEXT, cached_at DATETIME)`)
+
+    const cacheDateColumnExists = (kv.prepare(
+      `SELECT COUNT(*) AS count FROM pragma_table_info('kv_store') WHERE name = 'cached_at'`
+    ).get() as { count: number }).count > 0;
+
+    if (!cacheDateColumnExists) {
+      kv.exec(`ALTER TABLE kv_store ADD COLUMN cached_at DATETIME`);
+      kv.exec(`UPDATE kv_store SET cached_at = CURRENT_TIMESTAMP WHERE cached_at IS NULL`);
+    }
+
+    console.log("KV store initialized successfully")
   } catch (error) {
-    console.error("Error initializing kv_store:", (error as Error).message)
+    if (!(error instanceof Error && error.message.includes("duplicate column"))) {
+      console.error("Error initializing kv_store:", (error as Error).message)
+    }
   }
 }
 
 export function setKeyValue(key: string, value: string): void {
   try {
     const stmt = kv.prepare(`
-        INSERT INTO kv_store (key, value) VALUES (@key, @value)
-        ON CONFLICT(key) DO UPDATE SET value = excluded.value
+        INSERT INTO kv_store (key, value, cached_at) VALUES (@key, @value, CURRENT_TIMESTAMP)
+        ON CONFLICT(key) DO UPDATE SET value = excluded.value, cached_at = CURRENT_TIMESTAMP
       `)
     stmt.run({ key, value })
   } catch (error) {
@@ -27,11 +41,11 @@ export function setKeyValue(key: string, value: string): void {
   }
 }
 
-export function getKeyValue(key: string): string | null {
+export function getKeyValue(key: string): { value: string; cached_at: string } | null {
   try {
-    const stmt = kv.prepare("SELECT value FROM kv_store WHERE key = @key")
+    const stmt = kv.prepare("SELECT value, cached_at FROM kv_store WHERE key = @key")
     const result = stmt.get({ key }) as KeyValue | undefined
-    return result ? result.value : null
+    return result ? { value: result.value, cached_at: result.cached_at } : null
   } catch (error) {
     console.error(`Error getting key "${key}":`, (error as Error).message)
     return null
