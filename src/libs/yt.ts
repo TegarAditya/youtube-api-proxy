@@ -1,12 +1,31 @@
+/**
+ * Fetches content data for a given YouTube video ID.
+ * @param {string} videoId - The ID of the YouTube video.
+ * @param {string} apiKey - Your YouTube Data API key.
+ * @returns {Promise<ContentData>} A promise that resolves with the video's content data.
+ * @throws Will throw an error if the fetch operation fails or the API returns an error.
+ */
 export async function getYouTubeContentData(videoId: string, apiKey: string): Promise<ContentData> {
-  const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${apiKey}`
+  const url = new URL("https://www.googleapis.com/youtube/v3/videos")
+  url.searchParams.set("part", "snippet")
+  url.searchParams.set("id", videoId)
+  url.searchParams.set("key", apiKey)
+
   try {
-    console.log(`Fetching YouTube content data from URL: ${url}`)
-    const response = await fetch(url)
+    const response = await fetch(url.toString())
+
     if (!response.ok) {
-      throw new Error(`YouTube API error: ${response.statusText}`)
+      const errorData = await response.json().catch(() => null)
+      const errorMessage = errorData?.error?.message || response.statusText
+      throw new Error(`YouTube API error: ${response.status} ${errorMessage}`)
     }
-    return await response.json()
+
+    const data = await response.json()
+    if (!data.items || data.items.length === 0) {
+      throw new Error("Video not found.")
+    }
+
+    return data
   } catch (error) {
     throw new Error(`Failed to fetch YouTube content data: ${(error as Error).message}`)
   }
