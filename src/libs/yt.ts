@@ -13,7 +13,6 @@ export async function getYouTubeContentData(videoId: string, apiKey: string): Pr
 
   try {
     const response = await fetch(url.toString())
-
     if (!response.ok) {
       const errorData = await response.json().catch(() => null)
       const errorMessage = errorData?.error?.message || response.statusText
@@ -28,5 +27,26 @@ export async function getYouTubeContentData(videoId: string, apiKey: string): Pr
     return data
   } catch (error) {
     throw new Error(`Failed to fetch YouTube content data: ${(error as Error).message}`)
+  }
+}
+
+/**
+ * Validates a YouTube video ID by checking if it's a valid video.
+ * @param {string} videoId - The ID of the YouTube video to validate.
+ * @returns {Promise<boolean>} A promise that resolves with a boolean indicating if the video ID is valid.
+ */
+export async function isValidYouTubeVideoId(videoId: string): Promise<boolean> {
+  const url = new URL("https://www.youtube.com/oembed")
+  url.searchParams.set("url", `https://www.youtube.com/watch?v=${videoId}`)
+  url.searchParams.set("format", "json")
+
+  try {
+    const response = await fetch(url.toString())
+    return response.ok
+  } catch (error) {
+    console.error(
+      `Failed to validate YouTube video ID due to a network error: ${(error as Error).message}`
+    )
+    return false
   }
 }
