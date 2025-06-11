@@ -5,6 +5,13 @@ import { Context } from "hono"
 import { clearKVStore, getKeyValue, setKeyValue } from "../libs/kv"
 import { getYouTubeContentData, isValidYouTubeVideoId } from "../libs/yt"
 
+const TTL = Number(process.env.TTL) || 60 * 60 * 24
+
+const validateCacheExpiration = (cachedAt: string): boolean => {
+  const expirationTime = new Date(cachedAt).getTime() + TTL * 1000
+  return expirationTime > Date.now()
+}
+
 const factory = createFactory()
 
 export const findContent = factory.createHandlers(
@@ -18,7 +25,9 @@ export const findContent = factory.createHandlers(
     const id = c.req.param("id")
 
     const content = getKeyValue(id)
-    if (content) return c.json(await JSON.parse(content))
+    if (content && validateCacheExpiration(content.cached_at)) {
+      return c.json(JSON.parse(content.value))
+    }
 
     const isValid = await isValidYouTubeVideoId(id)
     if (!isValid) return c.text("Invalid YouTube video ID", 400)
