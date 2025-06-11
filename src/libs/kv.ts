@@ -3,6 +3,7 @@ import Database from "bun:sqlite"
 interface KeyValue {
   key: string
   value: string
+  cached_at: string
 }
 
 const kv = new Database("kv_store.sqlite", { strict: true, create: true })
@@ -31,11 +32,11 @@ export function setKeyValue(key: string, value: string): void {
   }
 }
 
-export function getKeyValue(key: string): string | null {
+export function getKeyValue(key: string): { value: string; cached_at: string } | null {
   try {
     const stmt = kv.prepare("SELECT value, cached_at FROM kv_store WHERE key = @key")
     const result = stmt.get({ key }) as KeyValue | undefined
-    return result ? result.value : null
+    return result ? { value: result.value, cached_at: result.cached_at } : null
   } catch (error) {
     console.error(`Error getting key "${key}":`, (error as Error).message)
     return null
