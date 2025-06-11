@@ -39,25 +39,30 @@ export const findContent = factory.createHandlers(
   }
 )
 
-export const clearContents = factory.createHandlers(async (c: Context) => {
-  try {
-    const secretKey = process.env.SECRET_KEY
-
-    if (!secretKey) {
-      return c.text("SECRET_KEY is not set", 500)
-    }
-
+export const clearContents = factory.createHandlers(
+  zValidator(
+    "query",
+    z.object({
+      key: z.string(),
+    })
+  ),
+  async (c: Context) => {
     const providedKey = c.req.query("key")
+    if (!providedKey) return c.text("Missing key parameter", 400)
+
+    const secretKey = process.env.SECRET_KEY
+    if (!secretKey) return c.text("SECRET_KEY is not set", 500)
 
     if (providedKey !== secretKey) {
       return c.text("Unauthorized", 401)
     }
 
-    clearKVStore()
-
-    return c.text("Cache cleared successfully")
-  } catch (error) {
-    console.error(`Error clearing cache:`, (error as Error).message)
-    return c.text("Internal Server Error", 500)
+    try {
+      clearKVStore()
+      return c.text("Cache cleared successfully")
+    } catch (error) {
+      console.error(`Error clearing cache:`, (error as Error).message)
+      return c.text("Internal Server Error", 500)
+    }
   }
-})
+)
