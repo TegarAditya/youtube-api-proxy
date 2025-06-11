@@ -5,7 +5,7 @@ import { Context } from "hono"
 import { clearKVStore, getKeyValue, setKeyValue } from "../libs/kv"
 import { getYouTubeContentData, isValidYouTubeVideoId } from "../libs/yt"
 
-const TTL = Number(process.env.TTL) || 60 * 60 * 24
+const TTL = Number(process.env.CACHE_TTL) || 60 * 60 * 24
 
 const validateCacheExpiration = (cachedAt: string): boolean => {
   const expirationTime = new Date(cachedAt).getTime() + TTL * 1000
